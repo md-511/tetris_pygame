@@ -1,6 +1,7 @@
 from settings import *
 from tetromino import Tetromino
 import sys
+import getpass
 
 # * INIT
 
@@ -96,7 +97,7 @@ def draw_txt():
     font.render_to(screen, (PLAY_FIELD[0] * 1.1, 7 * T_SIZE / 2), f"{care_package['score']:0>7}", SCORE_CLR, size=T_SIZE * 1.1)
     font.render_to(screen, (PLAY_FIELD[0] * 1.2, 11 * T_SIZE / 2), "Next", FONT_CLR, size=T_SIZE * 1.2)
     s = pg.Surface((T_SIZE * 10, T_SIZE * 5))
-    s.fill((0, 170, 100))
+    s.fill((0, 125, 85))
     r = s.get_rect()
     r.topleft = (PLAY_FIELD[0], 15 * T_SIZE / 2)
     screen.blit(s, r)
@@ -117,7 +118,7 @@ def draw_txt():
     i = pg.transform.rotate(i, 180)
     r.topleft = (PLAY_FIELD[0] * 1.15, 36.5 * T_SIZE / 2)
     screen.blit(i, r)
-    font.render_to(screen, (PLAY_FIELD[0] * 1.3, 37 * T_SIZE / 2), "Reach Down", FONT_CLR, size=T_SIZE * 0.5)
+    font.render_to(screen, (PLAY_FIELD[0] * 1.3, 37 * T_SIZE / 2), "Fall Faster", FONT_CLR, size=T_SIZE * 0.5)
 
 # * GAME LOOP
 
@@ -162,6 +163,25 @@ while True:
         if c < 1: game_over.play()
         c += 1
         tetrominoes = []
+
+        with open("./scores/scores.txt", 'a') as f:
+            f.write(f"{getpass.getuser()} - {care_package['score'  ]}\n")
+
+        after_game = True
+        while after_game:
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                    c = 0
+                    running = True
+                    care_package['score'] = 0
+                    care_package['game_over'] = False
+                    care_package['play_field'] = [[0] * N_COLS for _ in range(N_ROWS)]
+                    for sprite in tiles:
+                        sprite.kill()
+                    pg.mixer.music.play(-1)
+                    after_game = False
+                    # print(care_package)
+                    
 
     check_landed()
     clk.tick(FPS)

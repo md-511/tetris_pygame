@@ -14,6 +14,7 @@ class Tetromino:
         self.image = pg.transform.scale(self.image, (T_SIZE, T_SIZE))
         self.prev_pos = []
         self.curr = False
+        # self.spd_up = False
         self.start()
 
     def start(self):
@@ -68,12 +69,16 @@ class Tetromino:
     #         else:
     #             space_available = False
 
-    def get_down(self):
-        while not self.landed:
+    def get_down(self, spd):
+        # while not self.landed:
             # pg.time.wait(25)
-            self.move('down')
+            # self.move('down')
             # self.sprite_group.update()
             # self.sprite_group.draw(self.pkg['screen'])
+        if spd: 
+            pg.time.set_timer(self.pkg['usr_event'], FAST_FALLING_DELAY)
+        else:
+            pg.time.set_timer(self.pkg['usr_event'], max(CAPPED_FD, FALLING_DELAY - self.pkg['score'] // 5))
 
 
     def push_down(self, lowest_row, num_of_rows):
@@ -134,7 +139,9 @@ class Tetromino:
         elif event.type == pg.KEYDOWN and event.key == pg.K_UP and self.shape != 'O':
             self.rotate()
         elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
-            self.get_down()
+            self.get_down(True)
+        elif event.type == pg.KEYUP and event.key == pg.K_DOWN:
+            self.get_down(False)
 
     def move(self, direction):
         move_direction = MOVEMENT[direction]
@@ -170,3 +177,6 @@ class Tetromino:
                 self.move('down')
             self.pkg['game_over'] = self.is_game_over()
             self.check_lines()
+        
+        if self.landed:
+            self.get_down(False)
