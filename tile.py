@@ -5,7 +5,7 @@ class Tile(pg.sprite.Sprite):
     def __init__(self, tetromino, pos):
         super().__init__(tetromino.sprite_group)
         self.tetromino = tetromino
-        self.pos = pos + OFFSET
+        self.pos = pos + tetromino.pos
         self.image = tetromino.image
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos * T_SIZE

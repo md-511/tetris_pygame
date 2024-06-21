@@ -9,21 +9,23 @@ N_ROWS = 20
 
 FPS = 60
 
-FALLING_DELAY = 250
-REDUCED_FALLING_DELAY = 15
+FALLING_DELAY = 750
+CAPPED_FD = 50
 
 OFFSET = pg.math.Vector2(N_COLS // 2 - 1, 0)
 
 SCALE_X = 1.8
-SLACE_Y = 1.0
+SCALE_Y = 1.0
 PLAY_FIELD = (N_COLS * T_SIZE, N_ROWS * T_SIZE)
-WINDOW = (PLAY_FIELD[0] * SCALE_X, PLAY_FIELD[1] * SLACE_Y)
+WINDOW = (PLAY_FIELD[0] * SCALE_X, PLAY_FIELD[1] * SCALE_Y)
 
 ASSET_PATH = './assets/'
 FONT_PATH = './assets/a.ttf'
 BGM_PATH = './assets/Tetris.mp3'
 CLEAR_SFX_PATH = './assets/clear.wav'
 CTRL_IMG_PATH = './assets/a.png'
+GAME_OVER_SFX_PATH = './assets/game_over.wav'
+ROTATE_SFX_PATH = './assets/turn.mp3'
 
 FIELD_BG_CLR = (22, 22, 22)
 BG_CLR = (16, 186, 116)

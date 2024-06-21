@@ -5,7 +5,6 @@ import random
 class Tetromino:
     def __init__(self, pkg):
         self.shape = random.choice(list(SHAPES.keys()))
-        self.pos = VEC(0, 0)
         self.pkg = pkg
         self.sprite_group = pkg['sprite_group']
         self.field = pkg['play_field']
@@ -13,8 +12,19 @@ class Tetromino:
         self.image = pg.image.load(random.choice(pkg['images']))
         self.trigger = pkg['trigger']
         self.image = pg.transform.scale(self.image, (T_SIZE, T_SIZE))
-        self.tiles = [Tile(self, pos) for pos in SHAPES[self.shape]]
         self.prev_pos = []
+        self.curr = False
+        self.start()
+
+    def start(self):
+        if not self.curr:
+            self.pos = VEC(N_COLS + N_COLS // 2 - 1.3, N_ROWS // 2 - 1.2)
+        else:
+            for tile in self.tiles:
+                tile.kill()
+            self.pos = VEC(N_COLS // 2 - 1, 0)
+        self.tiles = [Tile(self, pos) for pos in SHAPES[self.shape]]
+
 
     def is_game_over(self):
         for tile in self.tiles:
@@ -43,7 +53,28 @@ class Tetromino:
         if len(rows_to_be_cleared) > 0:
             self.pkg['sound'].play()
             self.pkg['score'] += SCORE[len(rows_to_be_cleared)]
+            pg.time.set_timer(self.pkg['usr_event'], max(CAPPED_FD, FALLING_DELAY - self.pkg['score'] // 5))
             self.push_down(rows_to_be_cleared[0], len(rows_to_be_cleared))
+
+    # def get_down(self):
+    #     space_available = True
+    #     while space_available:
+    #         new_pos = [tile.pos + MOVEMENT['down'] for tile in self.tiles]
+    #         if self.check_collision(new_pos) == 0:
+    #             if any(map(Tile.check_other, self.tiles, new_pos)):
+    #                 space_available = False
+    #             else:
+    #                 self.move('down')
+    #         else:
+    #             space_available = False
+
+    def get_down(self):
+        while not self.landed:
+            # pg.time.wait(25)
+            self.move('down')
+            # self.sprite_group.update()
+            # self.sprite_group.draw(self.pkg['screen'])
+
 
     def push_down(self, lowest_row, num_of_rows):
         for i in range(lowest_row-1, -1, -1):
@@ -74,6 +105,7 @@ class Tetromino:
         status = self.check_collision(new_pos)
         # print(status)
         if status != 1 and status != 2:
+            self.pkg['rotate_sfx'].play()
             self.prev_pos = [tile.pos for tile in self.tiles]
             self.clear_prev()
             r = True
@@ -101,6 +133,8 @@ class Tetromino:
             self.move('right')
         elif event.type == pg.KEYDOWN and event.key == pg.K_UP and self.shape != 'O':
             self.rotate()
+        elif event.type == pg.KEYDOWN and event.key == pg.K_DOWN:
+            self.get_down()
 
     def move(self, direction):
         move_direction = MOVEMENT[direction]
@@ -130,8 +164,9 @@ class Tetromino:
 
     def update(self):
         # self.set_field()
-        self.trigger = self.pkg['trigger']
-        if self.trigger:
-            self.move('down')
-        self.pkg['game_over'] = self.is_game_over()
-        self.check_lines()
+        if self.curr:
+            self.trigger = self.pkg['trigger']
+            if self.trigger:
+                self.move('down')
+            self.pkg['game_over'] = self.is_game_over()
+            self.check_lines()
